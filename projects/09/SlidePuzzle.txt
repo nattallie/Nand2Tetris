@@ -1,0 +1,3 @@
+Slide Puzzle has simple rules. You can move empty cell UP, DOWN, RIGHT, LEFT. Your goal is to order numbers in ascended order and get empty cell on the last position. First you have 99 tries, if you can't manage to order them after moving empty cell 99 times, you lose.
+
+P.S I have used Random class in game, but this implementation isn't written by me.

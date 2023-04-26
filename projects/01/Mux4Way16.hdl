@@ -1,0 +1,37 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/01/Mux4Way16.hdl
+
+/**
+ * 4-way 16-bit multiplexor:
+ * out = a if sel == 00
+ *       b if sel == 01
+ *       c if sel == 10
+ *       d if sel == 11
+ */
+
+CHIP Mux4Way16 {
+    IN a[16], b[16], c[16], d[16], sel[2];
+    OUT out[16];
+
+    PARTS:
+	Mux16(a=a, b=b, sel=sel[0], out=begin0);
+	Mux16(a=c, b=d, sel=sel[0], out=begin1);
+	Mux16(a=begin0, b=begin1, sel=sel[1], out=out);	
+
+	//Xor(a=sel[0], b=sel[1], out=xorVal);
+	//Mux16(a=a, b=d, sel=sel[0], out=xor0case);
+	//Mux16(a=b, b=c, sel=sel[1], out=xor1case);
+	//Mux16(a=xor0case, b=xor1case, sel=xorVal, out=out);
+
+	//Nand(a=sel[0], b=sel[0], out=ind0);
+	//Xor(a=sel[0], b=sel[1], out=xorMiddle);    	
+	//And(a=xorMiddle, b=sel[0], out=ind1);
+	//And(a=xorMiddle, b=sel[1], out=ind2);
+	//And(a=sel[0], b=sel[1], out=ind3);
+	//Mux16(a=false, b=a[0..15], sel=ind0, out=out1);
+	//Mux16(a=out1, b=b[0..15], sel=ind1, out=out2);
+	//Mux16(a=out2, b=c[0..15], sel=ind2, out=out3);
+	//Mux16(a=out3, b=d[0..15], sel=ind3, out=out);
+}

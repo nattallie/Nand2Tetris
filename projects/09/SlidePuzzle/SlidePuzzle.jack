@@ -1,0 +1,232 @@
+class SlidePuzzle {
+    field int moveCnt, emptyCell, size;
+    field boolean gameEnded, hasWon;
+    field Array cells;
+
+    constructor SlidePuzzle new() {
+        do Screen.drawRectangle(0,0, 511, 255);
+        let moveCnt = 99;
+        let size = 9;
+        let gameEnded = false;
+        let hasWon = false;
+        let cells = Array.new(size);
+        do initNumArray();
+        do shuffleArray();
+        return this;
+    }
+
+    method void writeStartCond() {
+        do Output.printString("                     ");
+        do Output.println();
+        do Output.printString("  First you have ");
+        do Output.printInt(moveCnt);
+        do Output.printString("  ");
+        do Output.println();
+        do Output.printString("  tries to move      ");
+        do Output.println();
+        do Output.printString("  empty cell.        ");
+        do Output.println();
+        do Output.printString("                     ");
+        do Output.println();
+        do Output.printString("  Use UP, DOWN, LEFT ");
+        do Output.println();
+        do Output.printString("  and RIGHT KEYS.    ");
+        do Output.println();
+        do Output.printString("                     ");
+        do Output.println();
+        return;
+    }
+
+    method void writeLeftCnt() {
+        do Output.moveCursor(0, 45);
+        do Output.printString("                   ");
+        do Output.moveCursor(1, 45);
+        do Output.printString("  Tries left : ");
+        do Output.printInt(moveCnt);
+        do Output.printString("  ");
+        do Output.moveCursor(2, 45);
+        do Output.printString("                   ");
+        return;
+    }
+
+    method boolean moveUp() {
+        var int upNeigh;
+        if (emptyCell > 2) {
+            let upNeigh = emptyCell - 3;
+            do swapTwoCells(emptyCell, upNeigh);
+            let emptyCell = upNeigh;
+            return true;
+        }
+        return false;
+    }
+
+    method boolean moveDown() {
+        var int downNeigh;
+        if (emptyCell < 6) {
+            let downNeigh = emptyCell + 3;
+            do swapTwoCells(emptyCell, downNeigh);
+            let emptyCell = downNeigh;
+            return true;
+        }
+        return false;
+    }
+
+    method boolean moveRight() {
+        var int i, j, rightNeigh;
+        let i = emptyCell / 3;
+        let j = emptyCell - (i*3);
+        if (j < 2) {
+            let rightNeigh = emptyCell + 1;
+            do swapTwoCells(emptyCell, rightNeigh);
+            let emptyCell = rightNeigh;
+            return true;
+        } 
+        return false;
+    }
+
+    method boolean moveLeft() {
+        var int i, j, leftNeigh;
+        let i = emptyCell / 3;
+        let j = emptyCell - (i*3);
+        if (j > 0) {
+            let leftNeigh = emptyCell - 1;
+            do swapTwoCells(emptyCell, leftNeigh);
+            let emptyCell = leftNeigh;
+            return true;
+        } 
+        return false;
+    }
+
+    method boolean moveEmptyCell(int keySign) {
+        if (keySign = 131) {
+            return moveUp();
+        }
+
+        if (keySign = 133) {
+            return moveDown();
+        }
+
+        if (keySign = 130) {
+            return moveLeft();
+        }
+
+        if (keySign = 132) {
+            return moveRight();
+        }
+        return false;
+    }
+
+    method boolean isSolved() {
+        var int tmp, curNum;
+        var Cell curCell;
+        let tmp = 0;
+        while (tmp < 9) {
+            let curCell = cells[tmp];
+            let curNum = curCell.getNumber();
+            if (~(tmp = (curNum - 1)) & (~(tmp = emptyCell))) {
+                return false;
+            }
+            let tmp = tmp + 1;
+        }
+        return true;
+    }
+
+    method void printLastLabel(string msg) {
+        do Output.moveCursor(3, 45);
+        do Output.printString("                   ");
+        do Output.moveCursor(4, 45);
+        do Output.printString(msg);
+        do Output.moveCursor(5, 45);
+        do Output.printString("                   ");
+        return;
+    }
+
+    method void checkGameState() {
+        if (moveCnt = 0) {
+            let gameEnded = true;
+            do printLastLabel("  You're a loser!  ");
+        } 
+        if (isSolved()) {
+            let gameEnded = true;
+            do printLastLabel(" Congrats, you win! ");
+        }
+        return;
+    }
+
+    method void play() {
+        var int keySign;
+        do writeStartCond();
+        while (~(gameEnded)) {
+            let keySign = Keyboard.keyPressed();
+            if (~(keySign = 0)) {
+                do Memory.poke(24576, 0);
+                if (moveEmptyCell(keySign)) {
+                    let moveCnt = moveCnt - 1;
+                    do writeLeftCnt();
+                }
+            }
+            do checkGameState();
+        }
+        return;
+    }
+
+    method void swapTwoCells(int curInd, int nextInd) {
+        var int curNum, nextNum;
+        var Cell curCell, nextCell;
+        let curCell = cells[curInd];
+        let curNum = curCell.getNumber();
+        let nextCell = cells[nextInd];
+        let nextNum = nextCell.getNumber();
+        let cells[curInd] = Cell.new(nextNum, curInd);
+        let cells[nextInd] = Cell.new(curNum, nextInd);
+        return;
+    }
+
+    method void shuffleArray() {
+        var int curInd, nextInd;
+        var Cell curCell, nextCell;
+        let curInd = 0;
+        while (curInd < 9) {
+            let nextInd = Random.randRange(8);
+            if (nextInd = emptyCell) {
+                let emptyCell = curInd;
+            } else {
+                if (curInd = emptyCell) {
+                    let emptyCell = nextInd;
+                }
+            }
+            do swapTwoCells(curInd, nextInd);
+            let curInd = curInd + 1;
+        }
+        return;
+    }
+
+    method void initNumArray() {
+        var int tmp, curVal;
+        let emptyCell = Random.randRange(8);
+        let cells[emptyCell] = Cell.new(0, emptyCell);
+        let tmp = 0;
+        let curVal = 1;
+        while (tmp < 9) {
+            if (~(tmp = emptyCell)) {
+                let cells[tmp] = Cell.new(curVal, tmp);//Cell.new(curVal, tmp);
+                let curVal = curVal + 1;
+            } 
+            let tmp = tmp + 1;
+        }
+        return;
+    }
+
+    method void dispose() {
+        var int tmp;
+        var Cell curCell;
+        let tmp = 0;
+        while (tmp < 9) {
+            let curCell = cells[tmp];
+            do curCell.dispose();
+        }
+        do cells.dispose();
+        do Memory.deAlloc(this);
+        return;
+    }
+}
